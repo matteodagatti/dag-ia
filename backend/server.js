@@ -27,7 +27,7 @@ dotenv.config();
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "../frontend")));
+app.use(express.static(path.join(__dirname, "frontend")));
 
 // --- Configuration de l'upload de fichiers (image ou PDF joint à une question) ---
 // Les fichiers sont stockés temporairement en mémoire, jamais écrits sur le disque,
