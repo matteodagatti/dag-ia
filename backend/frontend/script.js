@@ -489,90 +489,49 @@ verifierConnexion();
 
 
 // ============================================================
-// FOND COSMIQUE PASTEL — étoiles + DAG ia flottant
-// ============================================================
-(function lancerCosmos() {
-  // Conteneur étoiles
-  var fondCosmique = document.createElement('div');
-  fondCosmique.className = 'fond-cosmique';
-  fondCosmique.setAttribute('aria-hidden', 'true');
-  document.body.prepend(fondCosmique);
 
-  // Étoiles statiques pastel
-  var couleurs = [
-    'rgba(167,139,250,0.6)',
-    'rgba(196,181,253,0.5)',
-    'rgba(124,58,237,0.4)',
-    'rgba(99,102,241,0.5)',
-    'rgba(255,255,255,0.7)',
-  ];
-  for (var i = 0; i < 60; i++) {
+// === FOND COSMIQUE PASTEL ===
+(function() {
+  // Étoiles de fond
+  var fc = document.createElement('div');
+  fc.className = 'fond-cosmique';
+  fc.setAttribute('aria-hidden','true');
+  document.body.prepend(fc);
+
+  var cols = ['rgba(167,139,250,0.7)','rgba(196,181,253,0.6)','rgba(124,58,237,0.5)','rgba(99,102,241,0.6)','rgba(255,255,255,0.8)'];
+  for (var i=0; i<70; i++) {
     var e = document.createElement('div');
     e.className = 'etoile-pastel';
-    var taille = Math.random() * 3 + 1;
-    e.style.cssText = [
-      'width:' + taille + 'px',
-      'height:' + taille + 'px',
-      'top:' + (Math.random() * 100) + '%',
-      'left:' + (Math.random() * 100) + '%',
-      'background:' + couleurs[Math.floor(Math.random() * couleurs.length)],
-      'animation:etoile-pulse ' + (2 + Math.random() * 4) + 's ' + (-Math.random() * 4) + 's ease-in-out infinite',
-    ].join(';');
-    fondCosmique.appendChild(e);
+    var t = Math.random()*3+0.8;
+    e.style.cssText='width:'+t+'px;height:'+t+'px;top:'+(Math.random()*100)+'%;left:'+(Math.random()*100)+'%;background:'+cols[Math.floor(Math.random()*cols.length)]+';animation:etoile-pulse '+(2+Math.random()*4)+'s '+(-(Math.random()*4))+'s ease-in-out infinite';
+    fc.appendChild(e);
   }
 
   // Étoiles filantes
-  function lancerEtoile() {
-    var etoile = document.createElement('div');
-    etoile.className = 'etoile-filante';
-    var longueur = 60 + Math.random() * 80;
-    etoile.style.cssText = [
-      'width:' + longueur + 'px',
-      'top:' + (Math.random() * 70) + '%',
-      'left:' + (10 + Math.random() * 80) + '%',
-      'animation:filer ' + (600 + Math.random() * 900) + 'ms linear forwards',
-    ].join(';');
-    fondCosmique.appendChild(etoile);
-    setTimeout(function() { etoile.remove(); }, 1500);
+  function filante() {
+    var s = document.createElement('div');
+    s.className = 'etoile-filante';
+    s.style.cssText='width:'+(50+Math.random()*80)+'px;top:'+(Math.random()*75)+'%;left:'+(10+Math.random()*80)+'%;animation:filer '+(600+Math.random()*800)+'ms linear forwards';
+    fc.appendChild(s);
+    setTimeout(function(){s.remove();},1500);
   }
-
-  (function planifier() {
-    setTimeout(function() { lancerEtoile(); planifier(); }, 500 + Math.random() * 1500);
-  })();
+  (function loop(){ setTimeout(function(){ filante(); loop(); }, 400+Math.random()*1400); })();
 
   // DAG ia flottants
-  var fondDag = document.createElement('div');
-  fondDag.className = 'fond-dag-flottant';
-  fondDag.setAttribute('aria-hidden', 'true');
-  document.body.prepend(fondDag);
+  var fd = document.createElement('div');
+  fd.className = 'fond-dag-flottant';
+  fd.setAttribute('aria-hidden','true');
+  document.body.prepend(fd);
 
-  var configs = [
-    {taille:'7rem',  opacite:0.07},
-    {taille:'15rem', opacite:0.04},
-    {taille:'4rem',  opacite:0.09},
-    {taille:'22rem', opacite:0.03},
-    {taille:'10rem', opacite:0.05},
-    {taille:'3rem',  opacite:0.1},
-    {taille:'18rem', opacite:0.035},
-    {taille:'6rem',  opacite:0.08},
-    {taille:'28rem', opacite:0.025},
-    {taille:'5rem',  opacite:0.07},
-  ];
-
-  configs.forEach(function(cfg, i) {
+  [
+    {t:'6rem',o:0.08},{t:'16rem',o:0.04},{t:'4rem',o:0.1},
+    {t:'24rem',o:0.03},{t:'10rem',o:0.06},{t:'3rem',o:0.09},
+    {t:'20rem',o:0.035},{t:'7rem',o:0.07},{t:'30rem',o:0.025},{t:'5rem',o:0.08}
+  ].forEach(function(cfg,i){
     var el = document.createElement('span');
     el.className = 'dag-lettre';
     el.textContent = 'DAG ia';
-    var anim = (i % 3) + 1;
-    var duree = 10 + Math.random() * 15;
-    var delay = -(Math.random() * 12);
-    el.style.cssText = [
-      'top:' + (Math.random() * 85) + '%',
-      'left:' + (Math.random() * 85) + '%',
-      'font-size:' + cfg.taille,
-      'opacity:' + cfg.opacite,
-      'animation:dag-flotter-' + anim + ' ' + duree + 's ' + delay + 's ease-in-out infinite',
-    ].join(';');
-    fondDag.appendChild(el);
+    el.style.cssText='top:'+(Math.random()*85)+'%;left:'+(Math.random()*85)+'%;font-size:'+cfg.t+';opacity:'+cfg.o+';animation:dag-'+(i%3+1)+' '+(10+Math.random()*15)+'s '+(-(Math.random()*12))+'s ease-in-out infinite';
+    fd.appendChild(el);
   });
 })();
