@@ -837,7 +837,7 @@ textarea:focus-visible {
 
 /* ----- Responsive mobile ----- */
 /* ----- Responsive : la barre latérale se cache sous 900px pour ne pas écraser le contenu principal ----- */
-@media (max-width: 600px) {
+@media (max-width: 900px) {
   .barre-laterale {
     display: none;
   }
@@ -1057,7 +1057,6 @@ textarea:focus-visible {
    SPLASH SCREEN — animation de bienvenue (1.5s au chargement)
    ============================================================ */
 .splash-ecran {
-  animation: splash-disparition 0.4s ease 1.5s forwards;
   position: fixed;
   inset: 0;
   z-index: 999;
@@ -1184,8 +1183,4 @@ textarea:focus-visible {
 @keyframes chargement-rebond {
   0%, 100% { transform: translateY(0);   opacity: 0.45; }
   50%       { transform: translateY(-7px); opacity: 1; }
-}
-
-@keyframes splash-disparition {
-  to { opacity: 0; visibility: hidden; pointer-events: none; }
 }
