@@ -430,10 +430,22 @@ body {
 
 /* ----- Zone de saisie ----- */
 .zone-question {
+  filter: drop-shadow(0 20px 60px rgba(124,58,237,0.25)) drop-shadow(0 4px 12px rgba(124,58,237,0.15));
   margin-bottom: 8px;
 }
 
 .formulaire {
+  background: #ffffff;
+  border: none;
+  border-radius: 28px;
+  box-shadow:
+    0 2px 0 rgba(124,58,237,0.15),
+    0 8px 0 rgba(124,58,237,0.08),
+    0 20px 60px rgba(124,58,237,0.2),
+    0 40px 80px rgba(167,139,250,0.12),
+    inset 0 1px 0 rgba(255,255,255,1);
+  transform: translateY(-4px);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
   background: rgba(255,255,255,0.55);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -453,6 +465,13 @@ body {
 }
 
 .formulaire:focus-within {
+  transform: translateY(-8px);
+  box-shadow:
+    0 2px 0 rgba(124,58,237,0.2),
+    0 10px 0 rgba(124,58,237,0.1),
+    0 30px 80px rgba(124,58,237,0.28),
+    0 50px 100px rgba(167,139,250,0.18),
+    inset 0 1px 0 rgba(255,255,255,1);
   border-color: var(--ambre);
   box-shadow: var(--ombre-carte-hover), 0 0 0 3px var(--ambre-clair);
 }
@@ -857,6 +876,17 @@ textarea:focus-visible {
   }
 
   .formulaire {
+  background: #ffffff;
+  border: none;
+  border-radius: 28px;
+  box-shadow:
+    0 2px 0 rgba(124,58,237,0.15),
+    0 8px 0 rgba(124,58,237,0.08),
+    0 20px 60px rgba(124,58,237,0.2),
+    0 40px 80px rgba(167,139,250,0.12),
+    inset 0 1px 0 rgba(255,255,255,1);
+  transform: translateY(-4px);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
   background: rgba(255,255,255,0.55);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
