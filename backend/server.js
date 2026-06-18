@@ -270,21 +270,7 @@ Règles de style strictes :
 // dans l'en-tête "x-mot-de-passe", sinon elle est refusée.
 // Le mot de passe est défini dans le fichier .env (APP_PASSWORD).
 // ------------------------------------------------------------
-app.use("/api", (req, res, next) => {
-  const motDePasseAttendu = process.env.APP_PASSWORD;
-  const motDePasseRecu = req.headers["x-mot-de-passe"];
-
-  if (!motDePasseAttendu) {
-    // Si aucun mot de passe n'est configuré côté serveur, on bloque par sécurité
-    return res.status(500).json({ erreur: "Aucun mot de passe configuré côté serveur." });
-  }
-
-  if (motDePasseRecu !== motDePasseAttendu) {
-    return res.status(401).json({ erreur: "Mot de passe incorrect." });
-  }
-
-  next();
-});
+// Mot de passe désactivé
 
 // ------------------------------------------------------------
 // La route principale : POST /api/ask

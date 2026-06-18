@@ -485,4 +485,8 @@ champQuestion.addEventListener("keydown", (event) => {
 afficherHistorique();
 afficherProjets();
 afficherCompte();
-verifierConnexion();
+// Affiche l'app après le splash (1.5s + 0.4s animation)
+setTimeout(() => {
+  contenuApplication.classList.remove("cachee");
+  ecranConnexion.classList.add("cachee");
+}, 1900);
