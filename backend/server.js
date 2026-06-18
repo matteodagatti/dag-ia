@@ -1,0 +1,394 @@
+// ============================================================
+// SERVEUR "FUSION IA"
+// Ce fichier fait 3 choses :
+// 1. Il expose une route web (/api/ask) que le frontend appelle
+// 2. Il envoie la question en parallèle à Claude, GPT et Gemini
+// 3. Il renvoie les 3 réponses à Claude une dernière fois pour
+//    les fusionner en une seule réponse finale
+// ============================================================
+
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import multer from "multer";
+import fs from "fs";
+import pdfParse from "pdf-parse";
+import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import { fileURLToPath } from "url";
+import path from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+dotenv.config();
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+app.use(express.static(path.join(__dirname, "../frontend")));
+
+// --- Configuration de l'upload de fichiers (image ou PDF joint à une question) ---
+// Les fichiers sont stockés temporairement en mémoire, jamais écrits sur le disque,
+// et une limite de 10 Mo évite qu'un fichier énorme ne bloque le serveur.
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
+});
+
+// --- Initialisation des 3 clients IA avec tes clés API (depuis .env) ---
+// ⚠️ On force l'utilisation du "fetch" natif de Node.js (fetch global)
+// plutôt que la librairie "node-fetch" embarquée par défaut dans les SDK,
+// car cette dernière a un bug de compatibilité avec les versions récentes
+// de Node (erreur "ERR_STREAM_PREMATURE_CLOSE").
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
+  fetch: globalThis.fetch,
+});
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  fetch: globalThis.fetch,
+});
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
+
+// ------------------------------------------------------------
+// Fonction 1 : interroger Claude (Anthropic)
+// ------------------------------------------------------------
+async function askClaude(question, fichier) {
+  try {
+    const consigne = `Réponds de façon concise et directe, sans listes ni formatage markdown, en quelques phrases. Question : ${question}`;
+
+    // Construction du contenu du message : texte seul, ou texte + image
+    let contenu;
+    if (fichier && fichier.estImage) {
+      contenu = [
+        {
+          type: "image",
+          source: {
+            type: "base64",
+            media_type: fichier.mimeType,
+            data: fichier.base64,
+          },
+        },
+        { type: "text", text: consigne },
+      ];
+    } else if (fichier && fichier.texteExtrait) {
+      // Pour un PDF : on insère son texte extrait directement dans le prompt
+      contenu = `Voici le contenu d'un document joint :\n\n${fichier.texteExtrait}\n\n${consigne}`;
+    } else {
+      contenu = consigne;
+    }
+
+    const response = await anthropic.messages.create({
+      model: "claude-sonnet-4-6",
+      max_tokens: 500,
+      messages: [{ role: "user", content: contenu }],
+    });
+    return response.content[0].text;
+  } catch (error) {
+    console.error("Erreur Claude:", error.message);
+    return null; // null = cette IA n'a pas répondu, on continue sans elle
+  }
+}
+
+// ------------------------------------------------------------
+// Fonction 2 : interroger GPT (OpenAI)
+// ------------------------------------------------------------
+async function askGPT(question, fichier) {
+  try {
+    const consigne = `Réponds de façon concise et directe, sans listes ni formatage markdown, en quelques phrases. Question : ${question}`;
+
+    let contenu;
+    if (fichier && fichier.estImage) {
+      contenu = [
+        { type: "text", text: consigne },
+        {
+          type: "image_url",
+          image_url: { url: `data:${fichier.mimeType};base64,${fichier.base64}` },
+        },
+      ];
+    } else if (fichier && fichier.texteExtrait) {
+      contenu = `Voici le contenu d'un document joint :\n\n${fichier.texteExtrait}\n\n${consigne}`;
+    } else {
+      contenu = consigne;
+    }
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [{ role: "user", content: contenu }],
+      max_tokens: 500,
+    });
+    return response.choices[0].message.content;
+  } catch (error) {
+    console.error("Erreur GPT:", error.message);
+    return null;
+  }
+}
+
+// ------------------------------------------------------------
+// Fonction 3 : interroger Gemini (Google)
+// ------------------------------------------------------------
+async function askGemini(question, fichier) {
+  try {
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const consigne = `Réponds de façon concise et directe, sans listes ni formatage markdown, en quelques phrases. Question : ${question}`;
+
+    let entree;
+    if (fichier && fichier.estImage) {
+      entree = [
+        consigne,
+        {
+          inlineData: {
+            mimeType: fichier.mimeType,
+            data: fichier.base64,
+          },
+        },
+      ];
+    } else if (fichier && fichier.texteExtrait) {
+      entree = `Voici le contenu d'un document joint :\n\n${fichier.texteExtrait}\n\n${consigne}`;
+    } else {
+      entree = consigne;
+    }
+
+    const result = await model.generateContent(entree);
+    return result.response.text();
+  } catch (error) {
+    console.error("Erreur Gemini:", error.message);
+    return null;
+  }
+}
+
+// ------------------------------------------------------------
+// Fonction de modification d'image : prend une image existante
+// + une instruction texte ("enlève le fond", "ajoute de la neige"...)
+// et renvoie une nouvelle image générée par Gemini (modèle "Nano Banana").
+// ------------------------------------------------------------
+async function modifierImage(instruction, fichier) {
+  const model = genAI.getGenerativeModel({
+    model: "gemini-2.5-flash-image",
+    generationConfig: { responseModalities: ["Text", "Image"] },
+  });
+
+  const entree = [
+    instruction,
+    {
+      inlineData: {
+        mimeType: fichier.mimeType,
+        data: fichier.base64,
+      },
+    },
+  ];
+
+  const result = await model.generateContent(entree);
+  const parties = result.response.candidates[0].content.parts;
+
+  // Logs de diagnostic temporaires : on regarde précisément ce que Gemini renvoie
+  console.log("Nombre de parties dans la réponse :", parties.length);
+  parties.forEach((p, i) => {
+    if (p.inlineData) {
+      console.log(`Partie ${i} : image, taille base64 = ${p.inlineData.data.length} caractères`);
+    } else if (p.text) {
+      console.log(`Partie ${i} : texte = "${p.text}"`);
+    }
+  });
+  console.log("Taille de l'image envoyée en entrée :", fichier.base64.length, "caractères");
+
+  const partieImage = parties.find((p) => p.inlineData);
+  const partieTexte = parties.find((p) => p.text);
+
+  if (!partieImage) {
+    throw new Error("Le modèle n'a pas renvoyé d'image.");
+  }
+
+  console.log("Image en sortie identique à l'entrée :", partieImage.inlineData.data === fichier.base64);
+
+  return {
+    imageBase64: partieImage.inlineData.data,
+    mimeType: partieImage.inlineData.mimeType,
+    commentaire: partieTexte ? partieTexte.text : "",
+  };
+}
+
+// ------------------------------------------------------------
+// Fonction 4 : fusionner les 3 réponses en une seule
+// On redemande à Claude de jouer le rôle d'"arbitre" qui lit
+// les 3 réponses et en fait une synthèse claire et unique.
+// ------------------------------------------------------------
+async function fusionner(question, reponses) {
+  // On ne garde que les réponses qui ont effectivement fonctionné
+  const reponsesValides = reponses.filter((r) => r.texte !== null);
+
+  if (reponsesValides.length === 0) {
+    return "Aucune des IA n'a pu répondre. Vérifie tes clés API et ta connexion.";
+  }
+
+  // Si une seule IA a répondu, pas besoin de fusionner : on la renvoie telle quelle
+  if (reponsesValides.length === 1) {
+    return reponsesValides[0].texte;
+  }
+
+  const blocReponses = reponsesValides
+    .map((r) => `--- Réponse de ${r.nom} ---\n${r.texte}`)
+    .join("\n\n");
+
+  const promptFusion = `Voici la même question posée à plusieurs IA différentes.
+
+Question : "${question}"
+
+${blocReponses}
+
+Rédige UNE réponse finale unique qui synthétise le meilleur de ces réponses.
+
+Règles de style strictes :
+- Texte fluide en phrases complètes, comme une personne qui répond clairement à l'oral
+- Pas de listes à puces, pas de tirets, pas d'astérisques, pas de titres avec #
+- Pas de gras ni d'italique
+- Si des chiffres ou une énumération courte sont nécessaires, intègre-les dans la phrase plutôt qu'en liste
+- Va droit au but, sans formule d'introduction du type "voici la réponse"
+- Si les sources divergent sur un point factuel, mentionne-le en une phrase simple
+- Ne cite jamais les noms des IA (ne dis pas "Claude pense" ou "GPT indique")
+- Reste concis : l'essentiel, sans détails superflus`;
+
+  try {
+    const response = await anthropic.messages.create({
+      model: "claude-sonnet-4-6",
+      max_tokens: 600,
+      messages: [{ role: "user", content: promptFusion }],
+    });
+    return response.content[0].text;
+  } catch (error) {
+    console.error("Erreur lors de la fusion:", error.message);
+    // Si la fusion échoue, on renvoie au moins la première réponse valide
+    return reponsesValides[0].texte;
+  }
+}
+
+// ------------------------------------------------------------
+// Protection par mot de passe partagé.
+// Toute requête vers /api/* doit inclure le bon mot de passe
+// dans l'en-tête "x-mot-de-passe", sinon elle est refusée.
+// Le mot de passe est défini dans le fichier .env (APP_PASSWORD).
+// ------------------------------------------------------------
+app.use("/api", (req, res, next) => {
+  const motDePasseAttendu = process.env.APP_PASSWORD;
+  const motDePasseRecu = req.headers["x-mot-de-passe"];
+
+  if (!motDePasseAttendu) {
+    // Si aucun mot de passe n'est configuré côté serveur, on bloque par sécurité
+    return res.status(500).json({ erreur: "Aucun mot de passe configuré côté serveur." });
+  }
+
+  if (motDePasseRecu !== motDePasseAttendu) {
+    return res.status(401).json({ erreur: "Mot de passe incorrect." });
+  }
+
+  next();
+});
+
+// ------------------------------------------------------------
+// La route principale : POST /api/ask
+// Le frontend envoie la question en "multipart/form-data" (pour pouvoir
+// y joindre un fichier optionnel), et reçoit la réponse fusionnée.
+// ------------------------------------------------------------
+app.post("/api/ask", upload.single("fichier"), async (req, res) => {
+  const { question } = req.body;
+
+  if (!question || question.trim() === "") {
+    return res.status(400).json({ erreur: "Merci d'envoyer une question." });
+  }
+
+  console.log("Question reçue :", question);
+
+  // Préparation du fichier joint (s'il y en a un) au format attendu
+  // par les 3 fonctions askClaude / askGPT / askGemini.
+  let fichier = null;
+  if (req.file) {
+    const estImage = req.file.mimetype.startsWith("image/");
+
+    if (estImage) {
+      fichier = {
+        estImage: true,
+        mimeType: req.file.mimetype,
+        base64: req.file.buffer.toString("base64"),
+      };
+    } else if (req.file.mimetype === "application/pdf") {
+      try {
+        const donneesPdf = await pdfParse(req.file.buffer);
+        // On limite le texte extrait pour ne pas dépasser les limites de contexte
+        fichier = { texteExtrait: donneesPdf.text.slice(0, 15000) };
+      } catch (error) {
+        console.error("Erreur lors de la lecture du PDF:", error.message);
+        return res.status(400).json({ erreur: "Impossible de lire ce PDF." });
+      }
+    } else {
+      return res.status(400).json({ erreur: "Type de fichier non supporté. Utilise une image (jpg, png) ou un PDF." });
+    }
+  }
+
+  // On appelle les 3 IA EN MÊME TEMPS (Promise.all) plutôt que l'une après l'autre,
+  // pour que ça soit plus rapide.
+  const [claudeTexte, gptTexte, geminiTexte] = await Promise.all([
+    askClaude(question, fichier),
+    askGPT(question, fichier),
+    askGemini(question, fichier),
+  ]);
+
+  const reponses = [
+    { nom: "Claude", texte: claudeTexte },
+    { nom: "GPT", texte: gptTexte },
+    { nom: "Gemini", texte: geminiTexte },
+  ];
+
+  const reponseFinale = await fusionner(question, reponses);
+
+  res.json({
+    reponse: reponseFinale,
+    // On renvoie aussi le détail, utile pour le débogage ou un mode "avancé" plus tard
+    details: reponses.map((r) => ({ nom: r.nom, aRepondu: r.texte !== null })),
+  });
+});
+
+// ------------------------------------------------------------
+// Route : POST /api/modifier-image
+// Reçoit une image + une instruction de modification ("enlève le fond",
+// "ajoute de la neige"...) et renvoie une nouvelle image générée.
+// ------------------------------------------------------------
+app.post("/api/modifier-image", upload.single("fichier"), async (req, res) => {
+  const { instruction } = req.body;
+
+  if (!instruction || instruction.trim() === "") {
+    return res.status(400).json({ erreur: "Merci de préciser la modification souhaitée." });
+  }
+
+  if (!req.file || !req.file.mimetype.startsWith("image/")) {
+    return res.status(400).json({ erreur: "Merci de joindre une image à modifier." });
+  }
+
+  console.log("Modification d'image demandée :", instruction);
+
+  const fichier = {
+    mimeType: req.file.mimetype,
+    base64: req.file.buffer.toString("base64"),
+  };
+
+  try {
+    const resultat = await modifierImage(instruction, fichier);
+    res.json({
+      image: resultat.imageBase64,
+      mimeType: resultat.mimeType,
+      commentaire: resultat.commentaire,
+    });
+  } catch (error) {
+    console.error("Erreur lors de la modification d'image:", error.message);
+    res.status(500).json({ erreur: "Impossible de modifier cette image. Réessaie avec une autre instruction." });
+  }
+});
+
+// ------------------------------------------------------------
+// Démarrage du serveur
+// ------------------------------------------------------------
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+  console.log(`Serveur Fusion IA démarré sur http://localhost:${PORT}`);
+});
