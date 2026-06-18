@@ -270,7 +270,7 @@ function validerConnexion(event) {
 
   sauvegarderCompte({ nom, email });
   afficherCompte();
-  
+  verifierConnexion();
 }
 
 function seDeconnecter() {
@@ -279,7 +279,7 @@ function seDeconnecter() {
   fermerModalCompte();
   champNomConnexion.value = "";
   champEmailConnexion.value = "";
-  
+  verifierConnexion();
 }
 
 // ------------------------------------------------------------
@@ -485,7 +485,94 @@ champQuestion.addEventListener("keydown", (event) => {
 afficherHistorique();
 afficherProjets();
 afficherCompte();
-setTimeout(() => {
-  contenuApplication.classList.remove("cachee");
-  ecranConnexion.classList.add("cachee");
-}, 1900);
+verifierConnexion();
+
+
+// ============================================================
+// FOND COSMIQUE PASTEL — étoiles + DAG ia flottant
+// ============================================================
+(function lancerCosmos() {
+  // Conteneur étoiles
+  var fondCosmique = document.createElement('div');
+  fondCosmique.className = 'fond-cosmique';
+  fondCosmique.setAttribute('aria-hidden', 'true');
+  document.body.prepend(fondCosmique);
+
+  // Étoiles statiques pastel
+  var couleurs = [
+    'rgba(167,139,250,0.6)',
+    'rgba(196,181,253,0.5)',
+    'rgba(124,58,237,0.4)',
+    'rgba(99,102,241,0.5)',
+    'rgba(255,255,255,0.7)',
+  ];
+  for (var i = 0; i < 60; i++) {
+    var e = document.createElement('div');
+    e.className = 'etoile-pastel';
+    var taille = Math.random() * 3 + 1;
+    e.style.cssText = [
+      'width:' + taille + 'px',
+      'height:' + taille + 'px',
+      'top:' + (Math.random() * 100) + '%',
+      'left:' + (Math.random() * 100) + '%',
+      'background:' + couleurs[Math.floor(Math.random() * couleurs.length)],
+      'animation:etoile-pulse ' + (2 + Math.random() * 4) + 's ' + (-Math.random() * 4) + 's ease-in-out infinite',
+    ].join(';');
+    fondCosmique.appendChild(e);
+  }
+
+  // Étoiles filantes
+  function lancerEtoile() {
+    var etoile = document.createElement('div');
+    etoile.className = 'etoile-filante';
+    var longueur = 60 + Math.random() * 80;
+    etoile.style.cssText = [
+      'width:' + longueur + 'px',
+      'top:' + (Math.random() * 70) + '%',
+      'left:' + (10 + Math.random() * 80) + '%',
+      'animation:filer ' + (600 + Math.random() * 900) + 'ms linear forwards',
+    ].join(';');
+    fondCosmique.appendChild(etoile);
+    setTimeout(function() { etoile.remove(); }, 1500);
+  }
+
+  (function planifier() {
+    setTimeout(function() { lancerEtoile(); planifier(); }, 500 + Math.random() * 1500);
+  })();
+
+  // DAG ia flottants
+  var fondDag = document.createElement('div');
+  fondDag.className = 'fond-dag-flottant';
+  fondDag.setAttribute('aria-hidden', 'true');
+  document.body.prepend(fondDag);
+
+  var configs = [
+    {taille:'7rem',  opacite:0.07},
+    {taille:'15rem', opacite:0.04},
+    {taille:'4rem',  opacite:0.09},
+    {taille:'22rem', opacite:0.03},
+    {taille:'10rem', opacite:0.05},
+    {taille:'3rem',  opacite:0.1},
+    {taille:'18rem', opacite:0.035},
+    {taille:'6rem',  opacite:0.08},
+    {taille:'28rem', opacite:0.025},
+    {taille:'5rem',  opacite:0.07},
+  ];
+
+  configs.forEach(function(cfg, i) {
+    var el = document.createElement('span');
+    el.className = 'dag-lettre';
+    el.textContent = 'DAG ia';
+    var anim = (i % 3) + 1;
+    var duree = 10 + Math.random() * 15;
+    var delay = -(Math.random() * 12);
+    el.style.cssText = [
+      'top:' + (Math.random() * 85) + '%',
+      'left:' + (Math.random() * 85) + '%',
+      'font-size:' + cfg.taille,
+      'opacity:' + cfg.opacite,
+      'animation:dag-flotter-' + anim + ' ' + duree + 's ' + delay + 's ease-in-out infinite',
+    ].join(';');
+    fondDag.appendChild(el);
+  });
+})();

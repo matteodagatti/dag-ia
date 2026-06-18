@@ -2,26 +2,26 @@
    TOKENS — palette claire et chaude, plus de profondeur
    ============================================================ */
 :root {
-  --papier: #07011a;
-  --papier-carte: #130a2a;
-  --encre: #f0e6ff;
-  --encre-douce: #c4a8e8;
-  --ligne: #3d2060;
-  --ligne-forte: #5a3090;
-  --ambre: #a855f7;
-  --ambre-fonce: #7c3aed;
-  --ambre-clair: #2d1060;
-  --bleu-gpt: #818cf8;
-  --bleu-gpt-clair: #1e1b4b;
-  --vert-gemini: #34d399;
-  --vert-gemini-clair: #064e3b;
+  --papier: #f3eeff;
+  --papier-carte: #ffffff;
+  --encre: #1e0a4a;
+  --encre-douce: #6b4fa0;
+  --ligne: #ddd0f5;
+  --ligne-forte: #c4aee8;
+  --ambre: #7c3aed;
+  --ambre-fonce: #5b21b6;
+  --ambre-clair: #ede9fe;
+  --bleu-gpt: #6366f1;
+  --bleu-gpt-clair: #e0e7ff;
+  --vert-gemini: #059669;
+  --vert-gemini-clair: #d1fae5;
 
   --serif: "Fraunces", "Iowan Old Style", Georgia, serif;
   --sans: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
 
   --rayon: 16px;
-  --ombre-carte: 0 1px 2px rgba(33, 29, 23, 0.04), 0 8px 24px rgba(33, 29, 23, 0.06);
-  --ombre-carte-hover: 0 2px 4px rgba(33, 29, 23, 0.05), 0 12px 32px rgba(33, 29, 23, 0.09);
+  --ombre-carte: 0 1px 3px rgba(90, 30, 180, 0.06), 0 8px 28px rgba(90, 30, 180, 0.1);
+  --ombre-carte-hover: 0 2px 6px rgba(90, 30, 180, 0.1), 0 14px 36px rgba(90, 30, 180, 0.16);
   --transition-douce: 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -31,6 +31,7 @@
 
 html {
   -webkit-font-smoothing: antialiased;
+  font-weight: 500;
 }
 
 body {
@@ -50,9 +51,9 @@ body {
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(circle at 15% -5%, rgba(197, 113, 46, 0.07), transparent 45%),
-    radial-gradient(circle at 90% 15%, rgba(58, 110, 165, 0.05), transparent 40%),
-    radial-gradient(circle at 50% 100%, rgba(79, 122, 74, 0.04), transparent 45%);
+    radial-gradient(ellipse at 20% 10%, rgba(167, 139, 250, 0.25), transparent 50%),
+    radial-gradient(ellipse at 85% 20%, rgba(196, 181, 253, 0.2), transparent 45%),
+    radial-gradient(ellipse at 50% 90%, rgba(124, 58, 237, 0.12), transparent 50%);
 }
 
 .fond-texture::after {
@@ -60,7 +61,7 @@ body {
   position: absolute;
   inset: 0;
   opacity: 0.4;
-  background-image: radial-gradient(rgba(33, 29, 23, 0.05) 0.6px, transparent 0.6px);
+  background-image: radial-gradient(rgba(124, 58, 237, 0.08) 0.6px, transparent 0.6px);
   background-size: 14px 14px;
 }
 
@@ -73,8 +74,8 @@ body {
   opacity: 0.5;
   background-image:
     radial-gradient(circle, transparent 60%, transparent 62%),
-    repeating-linear-gradient(135deg, rgba(197, 113, 46, 0.045) 0px, rgba(197, 113, 46, 0.045) 1px, transparent 1px, transparent 64px),
-    repeating-linear-gradient(45deg, rgba(58, 110, 165, 0.035) 0px, rgba(58, 110, 165, 0.035) 1px, transparent 1px, transparent 80px);
+    repeating-linear-gradient(135deg, rgba(167, 139, 250, 0.08) 0px, rgba(167, 139, 250, 0.08) 1px, transparent 1px, transparent 64px),
+    repeating-linear-gradient(45deg, rgba(99, 102, 241, 0.06) 0px, rgba(99, 102, 241, 0.06) 1px, transparent 1px, transparent 80px);
 }
 
 .fond-motifs::before,
@@ -82,7 +83,7 @@ body {
   content: "";
   position: absolute;
   border-radius: 50%;
-  border: 1.5px solid rgba(197, 113, 46, 0.12);
+  border: 1.5px solid rgba(167, 139, 250, 0.25);
 }
 
 .fond-motifs::before {
@@ -97,7 +98,7 @@ body {
   height: 220px;
   bottom: 8%;
   left: -70px;
-  border-color: rgba(79, 122, 74, 0.12);
+  border-color: rgba(99, 102, 241, 0.2);
 }
 
 .visually-hidden {
@@ -126,7 +127,7 @@ body {
 .barre-laterale {
   width: 248px;
   flex-shrink: 0;
-  background: rgba(19, 10, 42, 0.85);
+  background: rgba(255, 255, 255, 0.75);
   border-right: 1px solid var(--ligne);
   padding: 20px 16px;
   display: flex;
@@ -372,7 +373,7 @@ body {
   border-radius: 50%;
   top: 50%;
   left: 50%;
-  box-shadow: 0 1px 3px rgba(33, 29, 23, 0.15);
+  box-shadow: 0 1px 3px rgba(90, 30, 180, 0.12);
 }
 
 .point-1 { background: var(--ambre); transform: translate(-130%, -160%); }
@@ -602,12 +603,12 @@ button#bouton-envoyer {
   white-space: nowrap;
   transition: background var(--transition-douce), transform 0.15s ease, box-shadow var(--transition-douce);
   margin-bottom: 1px;
-  box-shadow: 0 2px 8px rgba(197, 113, 46, 0.3);
+  box-shadow: 0 2px 10px rgba(124, 58, 237, 0.35);
 }
 
 button#bouton-envoyer:hover {
   background: var(--ambre-fonce);
-  box-shadow: 0 4px 14px rgba(197, 113, 46, 0.38);
+  box-shadow: 0 4px 18px rgba(124, 58, 237, 0.5);
 }
 
 button#bouton-envoyer:active {
@@ -837,7 +838,7 @@ textarea:focus-visible {
 
 /* ----- Responsive mobile ----- */
 /* ----- Responsive : la barre latérale se cache sous 900px pour ne pas écraser le contenu principal ----- */
-@media (max-width: 900px) {
+@media (max-width: 600px) {
   .barre-laterale {
     display: none;
   }
@@ -879,7 +880,7 @@ textarea:focus-visible {
   position: fixed;
   inset: 0;
   z-index: 50;
-  background: rgba(33, 29, 23, 0.32);
+  background: rgba(30, 10, 74, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -902,7 +903,7 @@ textarea:focus-visible {
   padding: 30px 30px 26px;
   width: 100%;
   max-width: 380px;
-  box-shadow: 0 12px 40px rgba(33, 29, 23, 0.18);
+  box-shadow: 0 12px 40px rgba(90, 30, 180, 0.2);
   animation: monter-modal 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -1057,10 +1058,11 @@ textarea:focus-visible {
    SPLASH SCREEN — animation de bienvenue (1.5s au chargement)
    ============================================================ */
 .splash-ecran {
+  animation: splash-disparition 0.4s ease 1.5s forwards;
   position: fixed;
   inset: 0;
   z-index: 999;
-  background: var(--papier);
+  background: linear-gradient(135deg, #f8f4ff 0%, #ede9fe 50%, #faf5ff 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1183,4 +1185,87 @@ textarea:focus-visible {
 @keyframes chargement-rebond {
   0%, 100% { transform: translateY(0);   opacity: 0.45; }
   50%       { transform: translateY(-7px); opacity: 1; }
+}
+
+@keyframes splash-disparition {
+  to { opacity: 0; visibility: hidden; pointer-events: none; }
+}
+
+
+/* ============================================================
+   FOND COSMIQUE PASTEL — étoiles + DAG ia flottant
+   ============================================================ */
+.fond-cosmique {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.etoile-pastel {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+@keyframes etoile-pulse {
+  0%, 100% { opacity: 0.2; transform: scale(1); }
+  50%       { opacity: 0.8; transform: scale(1.6); }
+}
+
+.etoile-filante {
+  position: absolute;
+  height: 2px;
+  border-radius: 2px;
+  pointer-events: none;
+  background: linear-gradient(to right, transparent, rgba(167, 139, 250, 0.9), rgba(255,255,255,0.6));
+}
+
+@keyframes filer {
+  0%   { transform: translateX(0) translateY(0); opacity: 1; }
+  100% { transform: translateX(-300px) translateY(300px); opacity: 0; }
+}
+
+.fond-dag-flottant {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.dag-lettre {
+  position: absolute;
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 800;
+  color: rgba(124, 58, 237, 0.07);
+  user-select: none;
+  white-space: nowrap;
+  will-change: transform;
+}
+
+@keyframes dag-flotter-1 {
+  0%   { transform: translate(0, 0) rotate(-5deg) scale(1); }
+  25%  { transform: translate(35px, -25px) rotate(3deg) scale(1.04); }
+  50%  { transform: translate(-18px, 45px) rotate(-9deg) scale(0.96); }
+  75%  { transform: translate(50px, 18px) rotate(5deg) scale(1.06); }
+  100% { transform: translate(0, 0) rotate(-5deg) scale(1); }
+}
+
+@keyframes dag-flotter-2 {
+  0%   { transform: translate(0, 0) rotate(7deg) scale(1); }
+  30%  { transform: translate(-45px, 28px) rotate(-4deg) scale(1.08); }
+  60%  { transform: translate(28px, -55px) rotate(11deg) scale(0.92); }
+  80%  { transform: translate(-15px, 8px) rotate(-2deg) scale(1.04); }
+  100% { transform: translate(0, 0) rotate(7deg) scale(1); }
+}
+
+@keyframes dag-flotter-3 {
+  0%   { transform: translate(0, 0) rotate(-2deg) scale(1); }
+  25%  { transform: translate(65px, 38px) rotate(7deg) scale(0.93); }
+  55%  { transform: translate(-28px, -38px) rotate(-6deg) scale(1.1); }
+  80%  { transform: translate(18px, 55px) rotate(3deg) scale(1); }
+  100% { transform: translate(0, 0) rotate(-2deg) scale(1); }
 }
