@@ -485,4 +485,7 @@ champQuestion.addEventListener("keydown", (event) => {
 afficherHistorique();
 afficherProjets();
 afficherCompte();
-verifierConnexion();
+setTimeout(() => {
+  contenuApplication.classList.remove("cachee");
+  ecranConnexion.classList.add("cachee");
+}, 1900);

@@ -2,19 +2,19 @@
    TOKENS — palette claire et chaude, plus de profondeur
    ============================================================ */
 :root {
-  --papier: #F5F1E8;
-  --papier-carte: #FFFFFF;
-  --encre: #211D17;
-  --encre-douce: #6B6356;
-  --ligne: #E4DCC9;
-  --ligne-forte: #D2C7AA;
-  --ambre: #C5712E;
-  --ambre-fonce: #9C5621;
-  --ambre-clair: #F0DDC0;
-  --bleu-gpt: #3A6EA5;
-  --bleu-gpt-clair: #DCE7F2;
-  --vert-gemini: #4F7A4A;
-  --vert-gemini-clair: #E1EBDD;
+  --papier: #07011a;
+  --papier-carte: #130a2a;
+  --encre: #f0e6ff;
+  --encre-douce: #c4a8e8;
+  --ligne: #3d2060;
+  --ligne-forte: #5a3090;
+  --ambre: #a855f7;
+  --ambre-fonce: #7c3aed;
+  --ambre-clair: #2d1060;
+  --bleu-gpt: #818cf8;
+  --bleu-gpt-clair: #1e1b4b;
+  --vert-gemini: #34d399;
+  --vert-gemini-clair: #064e3b;
 
   --serif: "Fraunces", "Iowan Old Style", Georgia, serif;
   --sans: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
@@ -126,7 +126,7 @@ body {
 .barre-laterale {
   width: 248px;
   flex-shrink: 0;
-  background: rgba(255, 255, 255, 0.55);
+  background: rgba(19, 10, 42, 0.85);
   border-right: 1px solid var(--ligne);
   padding: 20px 16px;
   display: flex;
