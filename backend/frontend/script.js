@@ -270,7 +270,7 @@ function validerConnexion(event) {
 
   sauvegarderCompte({ nom, email });
   afficherCompte();
-  verifierConnexion();
+  
 }
 
 function seDeconnecter() {
@@ -279,7 +279,7 @@ function seDeconnecter() {
   fermerModalCompte();
   champNomConnexion.value = "";
   champEmailConnexion.value = "";
-  verifierConnexion();
+  
 }
 
 // ------------------------------------------------------------
