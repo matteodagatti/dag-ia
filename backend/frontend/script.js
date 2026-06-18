@@ -502,8 +502,8 @@ verifierConnexion();
   for (var i=0; i<70; i++) {
     var e = document.createElement('div');
     e.className = 'etoile-pastel';
-    var t = Math.random()*3+0.8;
-    e.style.cssText='width:'+t+'px;height:'+t+'px;top:'+(Math.random()*100)+'%;left:'+(Math.random()*100)+'%;background:'+cols[Math.floor(Math.random()*cols.length)]+';animation:etoile-pulse '+(2+Math.random()*4)+'s '+(-(Math.random()*4))+'s ease-in-out infinite';
+    var t = Math.random()*4+1.5;
+    e.style.cssText='width:'+t+'px;height:'+t+'px;top:'+(Math.random()*100)+'%;left:'+(Math.random()*100)+'%;background:'+cols[Math.floor(Math.random()*cols.length)]+';animation:etoile-pulse '+(1.5+Math.random()*3)+'s '+(-(Math.random()*3))+'s ease-in-out infinite';
     fc.appendChild(e);
   }
 
